@@ -93,8 +93,8 @@ function draw() {
     displayEasterEggMessage('"나를 찾아줘서 고마워요. 뜻밖의 작은 행복이 당신을 찾아올 거예요. 오늘 하루도 즐거운 일이 가득하길 바라요!"');
   } else if (currentScreen === 'treeEnd') {
     drawTreeView();
-    displayTreeEndMessage('"내 이야기가 네 마음에 조금이라도 닿았니? 힘들 때마다 오늘을 기억하고, 네 안의 힘과 주변의 응원을 잊지 말고 살아가렴. 언제든 다시 찾아와!"', 30);
-    displayTreeEndMessage('"ENTER키 누르렴"', 70);
+    displayTreeEndMessage('"내 이야기가 네 마음에 조금이라도 닿았니? 힘들 때마다 오늘을 기억하고, 네 안의 힘과 주변의 응원을 잊지 말고 살아가렴. 언제든 다시 찾아와!"', 70);
+    displayTreeEndMessage('"ENTER키 누르렴"', 30);
   } else if (currentScreen === 'ending') { 
     drawEndingScreen();
   }
