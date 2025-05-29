@@ -157,11 +157,21 @@ function mouseClicked() {
 
 function drawIntroScreen() {
   image(introImage, windowWidth / 2, windowHeight / 2, windowWidth, windowHeight);
+
+  textSize(30);
+  textAlign(CENTER, BOTTOM);
+  fill(0);
+  text("재생 버튼을 클릭하세요.", width / 2, height - 50);
 }
 
 function drawStartScreen() {
   image(treeImage, treeX, treeY, 500, 500);
   image(boyImage, boyX, boyY, 330, 330);
+
+  textSize(30);
+  textAlign(CENTER, BOTTOM);
+  fill(0);
+  text("방향키를 이용하여 나무에게 다가가세요.", width / 2, height - 50);
 }
 
 function handleStartInteraction() {
@@ -271,6 +281,6 @@ function displayTreeEndMessage(message, yoffset) {
 
 function keyPressed() {
   if (currentScreen === 'treeEnd' && keyCode === ENTER) {
-    currentScreen = 'ending'; // 화면 상태를 'ending'으로 변경
+    currentScreen = 'ending';
   }
 }
