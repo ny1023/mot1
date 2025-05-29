@@ -10,6 +10,8 @@ let magnifyingGlassCursor;
 let cursorImage;
 let ad1Image, ad2Image, ad3Image, ad4Image;
 let adImages = [];
+let forestImage;
+let forest2Image;
 let adImageIndex = 0;
 let showingAdImage = false;
 
@@ -17,16 +19,13 @@ let currentScreen = 'start';
 let boyX, boyY;
 let treeX, treeY;
 let treeCollisionDistance = 100;
-let treeCloseUpDistance = 150;
 let isTreeCloseUp = false;
 let ageRingPositions = [];
 let currentAdvice = "";
 let ladybugVisible = false;
 let ladybugX, ladybugY;
-let adviceCounter = 0;
-let adviceTriggerCount = 2;
-let adviceGivenCount = 0;
 let musicStarted = false;
+let hasSetupRings = false;
 
 function preload() {
   treeImage = loadImage('assets/tree.png');
@@ -39,11 +38,15 @@ function preload() {
   paperImage = loadImage('assets/paper.png');
   introImage = loadImage('assets/intro.png');
   endingImage = loadImage('assets/ending.jpg');
+  forestImage = loadImage('assets/forest.jpg');
+  forest2Image = loadImage('assets/forest2.jpg')
 
   ad1Image = loadImage('assets/ad/ad1.jpg');
   ad2Image = loadImage('assets/ad/ad2.jpg');
   ad3Image = loadImage('assets/ad/ad3.jpg');
   ad4Image = loadImage('assets/ad/ad4.jpg');
+
+  adImages = [ad1Image, ad2Image, ad3Image, ad4Image];
 }
 
 function setup() {
@@ -55,16 +58,13 @@ function setup() {
   boyY = height / 2;
   ladybugX = width / 2;
   ladybugY = height / 2 + 50;
-
-  adImages = [ad1Image, ad2Image, ad3Image, ad4Image];
   adImageIndex = 0;
 }
 
 function draw() {
   background(135, 206, 235);
-  image(cursorImage, mouseX, mouseY, 10, 10);
 
-   if (currentScreen === 'showAd' && showingAdImage) {
+  if (currentScreen === 'showAd' && showingAdImage) {
     image(adImages[adImageIndex], width / 2, height / 2, windowWidth, windowHeight);
     return;
   }
@@ -81,10 +81,6 @@ function draw() {
     drawStumpView();
     displayStumpMessage('"자, 이쪽으로 가까이 와 봐. 날 한번 클릭해보렴. 내 삶의 흔적을 보여줄게."', 30);
     displayStumpMessage('"내 나이테 하나하나에는 삶의 지혜가 담겨 있단다. 나이테를 누르면 네게 필요한 이야기가 들릴 거야."', 70);
-    handleStumpInteraction();
-    if (ladybugVisible) {
-      image(ladybugImage, ladybugX, ladybugY, 50, 50);
-    }
   } else if (currentScreen === 'ageRingInteraction') {
     drawAgeRingView();
   } else if (currentScreen === 'ladybugInteraction') {
@@ -95,7 +91,7 @@ function draw() {
     drawTreeView();
     displayTreeEndMessage('"내 이야기가 네 마음에 조금이라도 닿았니? 힘들 때마다 오늘을 기억하고, 네 안의 힘과 주변의 응원을 잊지 말고 살아가렴. 언제든 다시 찾아와!"', 70);
     displayTreeEndMessage('"ENTER키 누르렴"', 30);
-  } else if (currentScreen === 'ending') { 
+  } else if (currentScreen === 'ending') {
     drawEndingScreen();
   }
 }
@@ -115,49 +111,37 @@ function mousePressed() {
 }
 
 function mouseClicked() {
-   if (currentScreen === 'showAd' && showingAdImage) {
+  if (currentScreen === 'showAd' && showingAdImage) {
     showingAdImage = false;
     adImageIndex++;
-
     if (adImageIndex >= adImages.length) {
-      currentScreen = 'treeEnd'; // 조언 다 봤으면 종료 화면으로
+      currentScreen = 'treeEnd';
     } else {
-      currentScreen = 'stumpView'; // 아니면 다시 나이테 화면으로
+      currentScreen = 'stumpView';
+      hasSetupRings = false;
     }
     return;
   }
 
   if (currentScreen === 'treeView' && isTreeCloseUp) {
     currentScreen = 'stumpView';
-    setupAgeRings();
-    cursor(ARROW);
+    hasSetupRings = false;
   } else if (currentScreen === 'stumpView') {
-    checkAgeRingClick();
-    if (ladybugVisible && dist(mouseX, mouseY, ladybugX, ladybugY) < 25) {
+    let ladybugClicked = dist(mouseX, mouseY, ladybugX, ladybugY) < 25;
+    if (ladybugClicked) {
       currentScreen = 'ladybugInteraction';
+    } else {
+      checkAgeRingClick();
     }
   } else if (currentScreen === 'ladybugInteraction') {
     currentScreen = 'treeEnd';
   }
 }
 
-  if (currentScreen === 'treeView' && isTreeCloseUp) {
-    currentScreen = 'stumpView';
-    setupAgeRings();
-    cursor(ARROW);
-  } else if (currentScreen === 'stumpView') {
-    checkAgeRingClick();
-    if (ladybugVisible && dist(mouseX, mouseY, ladybugX, ladybugY) < 25) {
-      currentScreen = 'ladybugInteraction';
-    }
-  } else if (currentScreen === 'ladybugInteraction') {
-    currentScreen = 'treeEnd';
-  } 
-
-
 function drawIntroScreen() {
   image(introImage, windowWidth / 2, windowHeight / 2, windowWidth, windowHeight);
-
+  noCursor();
+  image(cursorImage, mouseX, mouseY, 70, 70);
   textSize(30);
   textAlign(CENTER, BOTTOM);
   fill(0);
@@ -165,13 +149,19 @@ function drawIntroScreen() {
 }
 
 function drawStartScreen() {
+  image(forestImage, windowWidth / 2, windowHeight / 2, windowWidth, windowHeight);
   image(treeImage, treeX, treeY, 500, 500);
   image(boyImage, boyX, boyY, 330, 330);
-
+  noCursor();
+  image(cursorImage, mouseX, mouseY, 70, 70);
+  fill(255);
+  noStroke();
+  rectMode(CENTER);
+  rect(width / 2, height - 70, 680, 60);
   textSize(30);
   textAlign(CENTER, BOTTOM);
   fill(0);
-  text("방향키를 이용하여 나무에게 다가가세요.", width / 2, height - 50);
+  text("방향키를 이용하여 나무에게 다가가세요.", width / 2, height - 60);
 }
 
 function handleStartInteraction() {
@@ -189,12 +179,13 @@ function handleStartInteraction() {
 }
 
 function drawTreeView() {
+  image(forestImage, windowWidth / 2, windowHeight / 2, windowWidth, windowHeight);
   let treeSize = 400;
   image(treeImage, width / 2, height / 2, treeSize, treeSize);
-
   let d = dist(mouseX, mouseY, width / 2, height / 2);
   if (d < treeSize / 2) {
-    cursor(magnifyingGlassCursor);
+    noCursor();
+    image(magnifyingGlassCursor, mouseX, mouseY, 100, 100);
     isTreeCloseUp = true;
   } else {
     cursor(ARROW);
@@ -211,11 +202,21 @@ function displayTreeMessage(message) {
 
 function drawEndingScreen() {
   image(endingImage, width / 2, height / 2, windowWidth, windowHeight);
+  noCursor();
+  image(cursorImage, mouseX, mouseY, 70, 70);
 }
 
 function drawStumpView() {
-  background(139, 69, 19);
+  image(forest2Image, windowWidth / 2, windowHeight / 2, windowWidth, windowHeight);
   image(stumpImage, width / 2, height / 2, 300, 300);
+
+  if (!hasSetupRings) {
+    setupAgeRings();
+    hasSetupRings = true;
+  }
+
+  noCursor();
+  image(cursorImage, mouseX, mouseY, 100, 100);
 }
 
 function displayStumpMessage(message, yOffset) {
@@ -225,10 +226,6 @@ function displayStumpMessage(message, yOffset) {
   text(message, width / 2, height - 50 - yOffset);
 }
 
-function handleStumpInteraction() {
-  // 나이테 클릭만 처리 중
-}
-
 function setupAgeRings() {
   ageRingPositions = [
     { x: width / 2 - 40, y: height / 2 - 20, radius: 30 },
@@ -236,28 +233,21 @@ function setupAgeRings() {
     { x: width / 2 - 10, y: height / 2 + 50, radius: 25 },
     { x: width / 2 + 60, y: height / 2 - 40, radius: 35 }
   ];
-  ladybugVisible = false;
-  adviceGivenCount = 0;
 }
 
 function drawAgeRingView() {
-  background(139, 69, 19);
+  image(forestImage, windowWidth / 2, windowHeight / 2, windowWidth, windowHeight);
   image(stumpImage, width / 2, height / 2, 300, 300);
-  fill(255, 100);
-  noStroke();
-  for (let ring of ageRingPositions) {
-    ellipse(ring.x, ring.y, ring.radius * 2);
-  }
+  noCursor();
+  image(cursorImage, mouseX, mouseY, 100, 100);
 }
-
-let selectedAgeRingIndex = -1;  // 전역변수로 클릭한 나이테 인덱스 저장
 
 function checkAgeRingClick() {
   for (let i = 0; i < ageRingPositions.length; i++) {
     let d = dist(mouseX, mouseY, ageRingPositions[i].x, ageRingPositions[i].y);
     if (d < ageRingPositions[i].radius) {
-      selectedAgeRingIndex = i;   // 클릭한 나이테 인덱스 저장
-      adImageIndex = i;           // adImageIndex도 이 인덱스로 맞추기
+      selectedAgeRingIndex = i;
+      adImageIndex = i;
       showingAdImage = true;
       currentScreen = 'showAd';
       return;
